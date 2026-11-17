@@ -1,0 +1,16 @@
+{
+    "files": [
+        "reaction.100.txt",
+        "propreo.100.txt",
+        "AirSystem.100.txt",
+        "chebi.100.txt",
+        "organic-compound-complex.100.txt",
+        "lubm.100.txt",
+        "FMA.100.txt",
+        "FuzzyWine.100.txt",
+        "worm_phenotype_xp.obo.100.txt",
+        "GRO.100.txt",
+        "atom-common.100.txt",
+        "SIGKDD-EKAW.100.txt"
+    ]
+}
