@@ -1,6 +1,6 @@
 # Benchmarks
 
-Performance harness for the `fuzzy_dl_owl2` reasoner. It times a corpus of fuzzy-DL knowledge bases (KBs) on four reasoners and builds the comparison tables of the paper: **Fuzzy OWL~2 Reasoning: A Re-Engineered Python Framework**.
+Performance harness for the `fuzzy_dl_owl2` reasoner. It times a corpus of fuzzy-DL knowledge bases (KBs) on four reasoners and builds the comparison tables of the paper: **Fuzzy OWL 2 Reasoning: A Re-Engineered Python Framework**.
 
 | Tool | What it runs | Input |
 |---|---|---|
