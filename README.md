@@ -1,6 +1,6 @@
 # Benchmarks
 
-Performance harness for the `fuzzy_dl_owl2` reasoner. It times a corpus of fuzzy-DL knowledge bases (KBs) on four reasoners and builds the comparison tables of the paper: **Fuzzy OWL 2 Reasoning: A Re-Engineered Python Framework**.
+Performance harness for the `fuzzy_dl_owl2` reasoner. It times a corpus of fuzzy-DL knowledge bases (KBs) on four reasoners and builds the comparison tables of the paper: **Fuzzy OWL~2 Reasoning: A Re-Engineered Python Framework**.
 
 | Tool | What it runs | Input |
 |---|---|---|
@@ -21,6 +21,7 @@ start-up included), averaged over N runs.
 |---|---|
 | `bench/` | The benchmark package (`python -m bench`). See [The `bench` package](#the-bench-package). |
 | `create_latex_table.py` | Builds the LaTeX tables from `results/`. |
+| `bench/phase_worker.py` | One timed process of the phase benchmark (see [Phase benchmark](#phase-benchmark)). |
 | `run_queries.py <provider> <file>` | One run: solve one KB with one provider. The building block of the Python benchmark. |
 | `run_fdl.sh <file>` | One run of the original implementation. |
 | `run_delorean.sh <file.dlr> [N]` | One run of DeLorean. |
@@ -28,7 +29,7 @@ start-up included), averaged over N runs.
 | `data.zip` | The `data/` directory, zipped. Unzip it before running anything (see [Data](#data)). |
 | `data/` | The KBs (below). |
 | `results/` | JSON results and solver model dumps (below). |
-| `tables/` | LaTeX tables written by `create_latex_table.py`. |
+| `tables/` | LaTeX tables written by `create_latex_table.py` and by `python -m bench phases`. |
 | `logs/<tool>/` | One timestamped log per invocation (`python`, `original`, `delorean`, `classical`, `convert`). |
 | `lib/`, `fuzzydl.jar`, `DeLorean.jar` | Java classpath of the original implementation and of DeLorean (`lib/HermiT/` for DeLorean). |
 | `FuzzyOwl2toDeLorean.jar` | OWL to DeLorean converter. |
@@ -188,6 +189,52 @@ It merges the plain and the graded JSON files (graded wins on a clash), renames 
 
 "Java" is the original implementation. The `base`, `delorean` and `all` tables also have a **reduced** version (suffix `_selected`) that keeps only the KBs of `results/selected_ontologies.json`. The classical table covers the KBs of `classical_dl_sat_results.json` (the plain `X.txt` KBs).
 
+## Phase benchmark
+
+Where the time of a `(sat?)` query goes (Łukasiewicz, `DLParserFast`, 20-minute timeout, 10 runs, mean ± sample standard deviation). It runs on the KBs of `results/selected_ontologies.json` (the graded `.100` files) with Gurobi, CBC and HiGHS, plus a trivial KB (`results/phases/trivial.txt`) that gives the fixed costs.
+
+```bash
+python -m bench phases run --dry-run     # only the estimate of the running time
+python -m bench phases run               # measure; writes results/phases/raw.csv and tables/phases_*.tex
+python -m bench phases tables            # rebuild the tables from the CSV
+```
+
+Options: `--parts python tokenizers java`, `--solvers gurobi cbc highs`, `--files NAME ...`, `--runs`, `--timeout` (minutes), `--warm-max-s` (no warm pass after a slower cold pass; default 60). The run resumes from the CSV; a unit that times out or fails is given up (N/A) and is not run again. The estimate comes from `graded_benchmark_results.json` / `graded_java_benchmark_results.json`. Every unit is run, the long ones included: `python -m bench phases run` measures all the KBs of `selected_ontologies.json`.
+
+**What is measured** (`time.perf_counter`, timers around calls only; the reasoner is not changed, the wrappers are installed on the loaded classes of the worker process):
+
+| Phase | Meaning |
+|---|---|
+| startup | process spawn until the first line of the worker (wall clock stamp of the parent) |
+| import | import of the parser, the reasoner and the solver library |
+| parse | `DLParserFast.get_kb`: tokenize + parser + KB construction (tokenize is also stored apart) |
+| tableau | `solve_kb` + `query.solve` minus the MILP optimisation call: ABox expansion and every MILP row written |
+| build | `MILPHelper.optimize` minus solver: rows copied into the model of the back end, solution read back and checked |
+| solver | `gurobipy.Model.optimize` / `pulp.LpProblem.solve` (for CBC and HiGHS this includes PuLP writing the model and, for CBC, starting the binary) |
+| other | wall minus the phases above (mostly interpreter exit; also stored as `teardown`) |
+| wall | wall clock of the whole process; the warm pass is subtracted (`process_wall` keeps the raw value) |
+
+Each process does a **cold** pass and, in the same process, one **warm** pass (same KB, same tokenizer; warm rows have `mode = warm`). The **Java** part runs `run_fdl.sh` (wall clock and the `Time (s)` of the jar); the trivial KB gives the JVM startup. The jar has no phase timers, so no finer split is possible.
+
+**Tokenizers.** `scan` runs the tokenizer alone on the file (read + scan + tuples): Cython (re2c scanner + Cython tuple builder, the default; the scanner is generated by re2c, not flex: `lexer_gen.c` is "Generated by re2c", although `generate.py` also writes a flex source that is not built), CFFI (the same re2c scanner, read through int32 arrays and converted in Python) and the pure-Python regular expressions. The file→KB time is measured with all three. The CFFI conversion of the reasoner (`FdlStringTokenizer._tokens_to_parser`) is used as it is, with two corrections applied in the worker process only (`cffi_tokens` in `bench/phase_worker.py`): its table of scanner codes is out of date (NUMBER is code 8, the table has it at 19, so numbers would become identifiers) and `*top*` / `*bottom*` must get the kinds `T_TOP` / `T_BOTTOM`, as in the Cython tuple builder; with them the CFFI stream equals the Cython one on every selected KB except `chebi.100` and `FMA.100`, which were not compared. The file-based CFFI path of the reasoner is broken (it calls `_tokens_to_parser_slice`, which does not exist), so CFFI uses the in-memory one. The two corrections add a small cost to the CFFI times (a lookup and one pass over the `*top*` tokens).
+
+| Output | Content |
+|---|---|
+| `results/phases/raw.csv` | one row per run and phase: `kb, language, solver, tokenizer, mode, run, phase, seconds` (`n_tokens` is a count, `timeout` / `failed` mark a given-up unit) |
+| `tables/phases_python_preparation.tex` | cold phases per KB and solver: Startup, Import, Parse, Tableau |
+| `tables/phases_python_solving.tex` | cold phases per KB and solver: Build, Solver, Other, Wall (the table is split in two so that each fits the text width) |
+| `tables/phases_python_warm_preparation.tex` | warm phases per KB and solver: Parse, Tableau |
+| `tables/phases_python_warm_solving.tex` | warm phases per KB and solver: Build, Solver, Warm total |
+| `tables/phases_java.tex` | Java wall and `Time (s)` next to the Python wall, startup + import and tableau + build + solver (Gurobi) |
+| `tables/phases_tokenizers_scan.tex` | tokens and scan time per tokenizer |
+| `tables/phases_tokenizers_file_to_kb.tex` | file→KB time per tokenizer |
+
+Each table file holds a bold header line and one line per row, without the `tabular` environment: write `\begin{tabular}{...}`, the rules and `\input{...}` around it by hand. The smallest mean of a group is in bold.
+
+**Rebuild the tables without measuring again.** The tables come only from `results/phases/raw.csv`, so after editing the CSV or the generator (`bench/phase_tables.py`) run `python -m bench phases tables` from `benchmark/`. It does not start any process and rewrites the seven `tables/phases_*.tex` files, **overwriting hand edits** of those files; copy them first if you changed them. To write elsewhere, call `phase_tables.save_tables(out_dir=Path(...))` from Python.
+
+**Limits.** Build and solver are separable only through the wrappers above, and the PuLP solver time includes file I/O. Tokenize is inside the cold parse, so it is not added twice. The import phase loads the solver library that the reasoner would load lazily. A warm pass is skipped after a slow cold pass, and the Python and Java timers differ (in-process timers versus the wall clock of a script that starts the JVM with a 20 GB heap and loads Gurobi). The timers add a small overhead (a few microseconds per call, not measured). Teardown is large for big KBs and is not split.
+
 ## Commands of the benchmark
 
 The results in `results/` come from these commands, run from this directory in this order, after `unzip -q data.zip` and with the virtual environment active. `--runs N` (or `BENCHMARK_RUNS=N`) sets the number of runs; the default is 10.
@@ -230,3 +277,10 @@ python create_latex_table.py                   # -> tables/
 ```
 
 `results/selected_ontologies.json` is the list of KBs of steps 3 and 4 and of the reduced tables; it is kept by hand.
+
+**Phase benchmark**
+
+```bash
+python -m bench phases run --dry-run           # estimate first
+python -m bench phases run                     # -> results/phases/raw.csv, tables/phases_*.tex
+```
