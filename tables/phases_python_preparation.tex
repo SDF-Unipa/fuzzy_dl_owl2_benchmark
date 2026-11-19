@@ -1,0 +1,52 @@
+\textbf{KB} & \textbf{Solver} & \textbf{Startup} & \textbf{Import} & \textbf{Parse} & \textbf{Tableau} \\
+ & Gurobi & $0.053 \pm 0.015$ & $0.787 \pm 0.373$ & $0.002 \pm 0.002$ & $0.002 \pm 0.005$ \\*
+ & CBC & $0.043 \pm 0.005$ & $0.801 \pm 0.085$ & $\mathbf{0.001 \pm 0.001}$ & $\mathbf{0.001 \pm 0.000}$ \\*
+\multirow{-3}{=}{(trivial)} & HiGHS & $\mathbf{0.042 \pm 0.003}$ & $\mathbf{0.763 \pm 0.088}$ & $0.001 \pm 0.001$ & $0.001 \pm 0.000$ \\
+\midrule
+ & Gurobi & $\mathbf{0.055 \pm 0.006}$ & $\mathbf{0.831 \pm 0.114}$ & $\mathbf{0.010 \pm 0.003}$ & $\mathbf{864.086 \pm 9.977}$ \\*
+ & CBC & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} \\*
+\multirow{-3}{=}{\path{AirSystem.100.txt}} & HiGHS & $0.067 \pm 0.017$ & $0.978 \pm 0.081$ & $0.010 \pm 0.005$ & $920.903 \pm 8.351$ \\
+\midrule
+ & Gurobi & $0.056 \pm 0.020$ & $\mathbf{0.727 \pm 0.124}$ & $3.915 \pm 0.229$ & $\mathbf{3.342 \pm 0.115}$ \\*
+ & CBC & $\mathbf{0.053 \pm 0.014}$ & $0.888 \pm 0.138$ & $\mathbf{3.862 \pm 0.118}$ & $3.418 \pm 0.201$ \\*
+\multirow{-3}{=}{\path{FMA.100.txt}} & HiGHS & $0.053 \pm 0.010$ & $0.779 \pm 0.066$ & $3.909 \pm 0.126$ & $3.514 \pm 0.254$ \\
+\midrule
+ & Gurobi & $0.053 \pm 0.009$ & $\mathbf{0.791 \pm 0.158}$ & $0.019 \pm 0.008$ & $7.146 \pm 0.376$ \\*
+ & CBC & $0.055 \pm 0.007$ & $0.920 \pm 0.067$ & $\mathbf{0.014 \pm 0.005}$ & $6.985 \pm 0.320$ \\*
+\multirow{-3}{=}{\path{FuzzyWine.100.txt}} & HiGHS & $\mathbf{0.050 \pm 0.010}$ & $0.813 \pm 0.102$ & $0.017 \pm 0.009$ & $\mathbf{6.840 \pm 0.200}$ \\
+\midrule
+ & Gurobi & $0.041 \pm 0.007$ & $\mathbf{0.637 \pm 0.053}$ & $\mathbf{0.017 \pm 0.003}$ & $0.014 \pm 0.004$ \\*
+ & CBC & $\mathbf{0.038 \pm 0.007}$ & $0.682 \pm 0.033$ & $0.018 \pm 0.005$ & $\mathbf{0.014 \pm 0.004}$ \\*
+\multirow{-3}{=}{\path{GRO.100.txt}} & HiGHS & $0.041 \pm 0.009$ & $0.704 \pm 0.043$ & $0.019 \pm 0.007$ & $0.015 \pm 0.005$ \\
+\midrule
+ & Gurobi & $0.040 \pm 0.005$ & $\mathbf{0.665 \pm 0.055}$ & $0.006 \pm 0.002$ & $0.002 \pm 0.001$ \\*
+ & CBC & $0.041 \pm 0.006$ & $0.704 \pm 0.030$ & $0.006 \pm 0.003$ & $0.002 \pm 0.001$ \\*
+\multirow{-3}{=}{\path{SIGKDD-EKAW.100.txt}} & HiGHS & $\mathbf{0.038 \pm 0.005}$ & $0.720 \pm 0.053$ & $\mathbf{0.005 \pm 0.002}$ & $\mathbf{0.002 \pm 0.000}$ \\
+\midrule
+ & Gurobi & $0.038 \pm 0.007$ & $\mathbf{0.643 \pm 0.032}$ & $\mathbf{0.002 \pm 0.001}$ & $\mathbf{0.004 \pm 0.002}$ \\*
+ & CBC & $\mathbf{0.037 \pm 0.006}$ & $0.664 \pm 0.025$ & $0.002 \pm 0.001$ & $0.006 \pm 0.002$ \\*
+\multirow{-3}{=}{\path{atom-common.100.txt}} & HiGHS & $0.041 \pm 0.006$ & $0.724 \pm 0.029$ & $0.002 \pm 0.001$ & $0.005 \pm 0.002$ \\
+\midrule
+ & Gurobi & $\mathbf{0.054 \pm 0.005}$ & $\mathbf{0.789 \pm 0.068}$ & $6.856 \pm 0.200$ & $11.816 \pm 0.274$ \\*
+ & CBC & $0.055 \pm 0.015$ & $0.813 \pm 0.066$ & $6.247 \pm 0.234$ & $10.567 \pm 0.488$ \\*
+\multirow{-3}{=}{\path{chebi.100.txt}} & HiGHS & $0.057 \pm 0.006$ & $0.847 \pm 0.086$ & $\mathbf{6.232 \pm 0.123}$ & $\mathbf{10.507 \pm 0.231}$ \\
+\midrule
+ & Gurobi & $0.059 \pm 0.026$ & $\mathbf{0.761 \pm 0.097}$ & $0.160 \pm 0.023$ & $6.635 \pm 0.193$ \\*
+ & CBC & $0.055 \pm 0.006$ & $0.877 \pm 0.109$ & $0.165 \pm 0.017$ & $6.816 \pm 0.302$ \\*
+\multirow{-3}{=}{\path{lubm.100.txt}} & HiGHS & $\mathbf{0.055 \pm 0.007}$ & $0.809 \pm 0.084$ & $\mathbf{0.144 \pm 0.017}$ & $\mathbf{6.557 \pm 0.214}$ \\
+\midrule
+ & Gurobi & $\mathbf{0.054 \pm 0.007}$ & $\mathbf{0.756 \pm 0.072}$ & $0.007 \pm 0.003$ & $\mathbf{31.452 \pm 0.390}$ \\*
+ & CBC & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} \\*
+\multirow{-3}{=}{\path{organic-compound-complex.100.txt}} & HiGHS & $0.060 \pm 0.010$ & $0.904 \pm 0.084$ & $\mathbf{0.006 \pm 0.003}$ & $33.595 \pm 0.747$ \\
+\midrule
+ & Gurobi & $\mathbf{0.052 \pm 0.008}$ & $\mathbf{0.765 \pm 0.110}$ & $\mathbf{0.014 \pm 0.005}$ & $\mathbf{443.988 \pm 2.452}$ \\*
+ & CBC & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} \\*
+\multirow{-3}{=}{\path{propreo.100.txt}} & HiGHS & $0.060 \pm 0.005$ & $0.929 \pm 0.160$ & $0.018 \pm 0.007$ & $481.442 \pm 5.379$ \\
+\midrule
+ & Gurobi & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} \\*
+ & CBC & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} \\*
+\multirow{-3}{=}{\path{reaction.100.txt}} & HiGHS & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} & \textbf{N/A} \\
+\midrule
+ & Gurobi & $0.043 \pm 0.006$ & $0.685 \pm 0.079$ & $\mathbf{0.067 \pm 0.012}$ & $\mathbf{0.017 \pm 0.004}$ \\*
+ & CBC & $0.041 \pm 0.005$ & $0.729 \pm 0.066$ & $0.067 \pm 0.011$ & $0.019 \pm 0.004$ \\*
+\multirow{-3}{=}{\path{worm_phenotype_xp.obo.100.txt}} & HiGHS & $\mathbf{0.040 \pm 0.008}$ & $\mathbf{0.683 \pm 0.036}$ & $0.068 \pm 0.008$ & $0.017 \pm 0.004$ \\

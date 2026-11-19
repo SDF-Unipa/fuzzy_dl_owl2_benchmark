@@ -1,0 +1,2 @@
+(instance a Thing 1.0)
+(sat?)

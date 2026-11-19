@@ -10,7 +10,7 @@ import dataclasses
 import typing
 from pathlib import Path
 
-from . import tasks
+from . import phase_tables, phases, tasks
 from .common import RESULTS_DIR, BenchmarkConfig, OntologyKind, Tool, setup_logging
 from .engine import run_benchmark
 from .providers import Provider, ProviderSet
@@ -52,6 +52,23 @@ def build_parser() -> argparse.ArgumentParser:
 
     classical = sub.add_parser("classical", help="time Pellet on the selected ontologies")
     classical.add_argument("--runs", type=int, help="runs per file (default: BENCHMARK_RUNS or 10)")
+
+    ph = sub.add_parser("phases", help="time the phases of a (sat?) query (startup, parse, "
+                                       "tableau, solver) and compare the tokenizers")
+    ph_sub = ph.add_subparsers(dest="phases_command", required=True)
+    ph_run = ph_sub.add_parser("run", help="measure and write results/phases/raw.csv and the tables")
+    ph_run.add_argument("--parts", nargs="+", type=phases.Part, choices=list(phases.Part),
+                        default=list(phases.Part))
+    ph_run.add_argument("--solvers", nargs="+", type=Provider,
+                        default=[Provider.GUROBI, Provider.CBC, Provider.HIGHS])
+    ph_run.add_argument("--files", nargs="+", metavar="NAME",
+                        help="KBs of data/graded (default: results/selected_ontologies.json)")
+    ph_run.add_argument("--runs", type=int, default=10)
+    ph_run.add_argument("--timeout", type=int, default=20, help="minutes per process")
+    ph_run.add_argument("--warm-max-s", type=float, default=60.0,
+                        help="no warm pass when the cold pass takes longer (seconds)")
+    ph_run.add_argument("--dry-run", action="store_true", help="only log the estimate")
+    ph_sub.add_parser("tables", help="rebuild the LaTeX tables from results/phases/raw.csv")
     return parser
 
 
@@ -93,6 +110,15 @@ def main(argv: typing.Optional[list[str]] = None) -> None:
         else:
             files = runner.resolve(args.files) if args.files else None
         run_benchmark(runner, _make_config(args), files)
+    elif args.command == "phases":
+        if args.phases_command == "run":
+            cfg = BenchmarkConfig(runs=args.runs, max_failures=1, timeout_min=args.timeout)
+            names = args.files or tasks.load_selected_ontologies()
+            phases.run_phases(args.parts, args.solvers, names, cfg, args.warm_max_s,
+                              args.dry_run)
+            if args.dry_run:
+                return
+        phase_tables.save_tables()
     elif args.command == "convert":
         tasks.convert_all()
     elif args.command == "classical":
